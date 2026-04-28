@@ -5,57 +5,364 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap"
+          rel="stylesheet">
+
     <style>
+        :root {
+            --bg:      #0f1117;
+            --surface: #1a1d27;
+            --border:  #2a2e3f;
+            --accent:  #4f8ef7;
+            --accent-h:#3a7ae0;
+            --success: #34d399;
+            --text:    #e4e8f0;
+            --muted:   #7a82a0;
+            --radius:  12px;
+            --shadow:  0 8px 32px rgba(0,0,0,.45);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            text-align:center
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 48px 16px 64px;
+        }
+
+        /* ── Header ─────────────────────────────────────────────── */
+        header {
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 36px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+        header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+        header h1 span { color: var(--accent); }
+        header p { margin-top: 6px; font-size: .88rem; color: var(--muted); }
+
+        /* ── Card ────────────────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: var(--shadow);
+            margin-bottom: 32px;
+        }
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title::before {
+            content: '';
+            width: 4px; height: 18px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* ── Campos do formulário ────────────────────────────────── */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 18px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            font-size: .78rem;
+            font-weight: 500;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        input[type="text"] {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+            width: 100%;
+        }
+        input[type="text"]::placeholder { color: #3e4460; }
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,142,247,.18);
+        }
+
+        .btn-salvar {
+            margin-top: 8px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            display: block;
+            width: 100%;
+        }
+        .btn-salvar:hover  { background: var(--accent-h); }
+        .btn-salvar:active { transform: scale(.98); }
+
+        /* ── Toast ───────────────────────────────────────────────── */
+        #toast {
+            position: fixed;
+            bottom: 28px; right: 28px;
+            background: var(--success);
+            color: #0f1117;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: .9rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity .3s, transform .3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+
+        /* ── Tabela ──────────────────────────────────────────────── */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+
+        thead { background: #12141f; }
+        thead th {
+            padding: 13px 16px;
+            text-align: left;
+            font-size: .7rem;
+            font-weight: 500;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #1f2235; }
+        tbody td { padding: 13px 16px; color: var(--text); }
+
+        .badge-id {
+            display: inline-block;
+            background: rgba(79,142,247,.15);
+            color: var(--accent);
+            border-radius: 6px;
+            padding: 2px 9px;
+            font-size: .78rem;
+            font-weight: 500;
+        }
+        .empty-row td {
+            text-align: center;
+            color: var(--muted);
+            padding: 32px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row { flex-direction: column; }
         }
     </style>
-    <title>usuario</title>
 </head>
 <body>
-    <h1>Cadastro de usuários</h1>
-    <form id="usuarioForm" th:action="@{/usuarios}" th:object="${usuarioModel}" method="post">
-        <label>Nome do Usuário</label>
-        <input type="text" id="nomeProduto"  th:field="*{nomeUsuario}"><br>
-        <button id="salvarUsuario" type="submit">Salvar</button>
+
+<header>
+    <h1>Cadastro de <span>Usuários</span></h1>
+</header>
+
+<!-- ════════════════════════════════════════════════════════════════
+     FORMULÁRIO DE CADASTRO
+     th:action  → aponta para o POST /usuarios do controller
+     th:object  → vincula ao UsuarioModel que o controller enviou
+     ════════════════════════════════════════════════════════════════ -->
+<div class="card">
+    <div class="card-title">Novo Cadastro</div>
+
+    <form id="usuarioForm"
+          th:action="@{/usuarios}"
+          th:object="${usuarioModel}"
+          method="post">
+
+        <!-- Campo: Nome do Usuário -->
+        <div class="form-group">
+            <label for="nomeUsuario">Nome do Usuário</label>
+            <input type="text"
+                   id="nomeUsuario"
+                   th:field="*{nomeUsuario}"
+                   placeholder="Ex.: João da Silva">
+        </div>
+
+        <!-- Campos RG e CPF lado a lado -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="rg">RG</label>
+                <input type="text"
+                       id="rg"
+                       th:field="*{rg}"
+                       placeholder="Ex.: 12.345.678-9">
+            </div>
+
+            <div class="form-group">
+                <label for="cpf">CPF</label>
+                <input type="text"
+                       id="cpf"
+                       th:field="*{cpf}"
+                       placeholder="Ex.: 000.000.000-00">
+            </div>
+        </div>
+
+        <!-- Campo: Nome da Mãe -->
+        <div class="form-group">
+            <label for="nomeMae">Nome da Mãe</label>
+            <input type="text"
+                   id="nomeMae"
+                   th:field="*{nomeMae}"
+                   placeholder="Ex.: Maria Aparecida da Silva">
+        </div>
+
+        <button class="btn-salvar" id="salvarUsuario" type="submit">
+            Salvar
+        </button>
+
     </form>
-    <h2>Usuários Cadastrados</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nome do Usuário</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="usuario : ${usuarios}">
-            <td th:text="${usuario.id}"></td>
-            <td th:text="${usuario.nomeUsuario}"></td>
-        </tr>
-        </tbody>
-    </table>
-    <script>
-        document.getElementById("usuarioForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // Impede o envio padrão do formulário
+</div>
 
-        var form = event.target;
-        var formData = new FormData(form);
+<!-- ════════════════════════════════════════════════════════════════
+     TABELA DE USUÁRIOS CADASTRADOS
+     th:each  → loop igual a um "for" — percorre a lista ${usuarios}
+     th:text  → exibe o valor de cada atributo na célula
+     th:if    → só mostra a linha "vazia" se a lista for nula ou vazia
+     ════════════════════════════════════════════════════════════════ -->
+<div class="card">
+    <div class="card-title">Usuários Cadastrados</div>
 
-        fetch(form.action, {
-            method: form.method,
-            body: formData
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = "/usuarios/pesquisa";
-                alert("Salvo com sucesso");
-            } else {
-                console.error("Erro ao salvar o usuário");
-            }
-        }).catch(error => {
-            console.error("Erro ao salvar o usuário", error);
-            alert("Erro ao Salvar");
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome do Usuário</th>
+                <th>RG</th>
+                <th>CPF</th>
+                <th>Nome da Mãe</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <!-- Linha repetida para cada usuário vindo do banco -->
+            <tr th:each="usuario : ${usuarios}">
+                <td><span class="badge-id" th:text="${usuario.id}">-</span></td>
+                <td th:text="${usuario.nomeUsuario}">-</td>
+                <td th:text="${usuario.rg}">-</td>
+                <td th:text="${usuario.cpf}">-</td>
+                <td th:text="${usuario.nomeMae}">-</td>
+            </tr>
+
+            <!--
+                CORREÇÃO: usa th:unless com usuarios != null
+                em vez de #lists.isEmpty() que quebra quando
+                usuarios é null (ex.: ao entrar direto em /usuarios)
+            -->
+            <tr class="empty-row"
+                th:if="${usuarios == null or #lists.isEmpty(usuarios)}">
+                <td colspan="5">Nenhum usuário cadastrado ainda.</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Toast de confirmação -->
+<div id="toast">✓ Usuário salvo com sucesso!</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     JAVASCRIPT — Envia o form via AJAX sem recarregar a página
+     ════════════════════════════════════════════════════════════════ -->
+<script>
+    document.getElementById("usuarioForm")
+        .addEventListener("submit", function (event) {
+
+            // 1. Impede o comportamento padrão (reload da página)
+            event.preventDefault();
+
+            // 2. Captura o form e seus dados
+            var form     = event.target;
+            var formData = new FormData(form);
+
+            // 3. Envia via Fetch API (AJAX) para o POST /usuarios
+            fetch(form.action, {
+                method: form.method,
+                body:   formData
+            })
+                .then(function (response) {
+                    if (response.ok) {
+
+                        // 4a. Mostra toast de sucesso
+                        var toast = document.getElementById("toast");
+                        toast.classList.add("show");
+                        setTimeout(function () {
+                            toast.classList.remove("show");
+                        }, 2500);
+
+                        // 4b. Redireciona para pesquisa para atualizar a tabela
+                        window.location.href = "/usuarios/pesquisa";
+
+                    } else {
+                        alert("Erro ao salvar o usuário.");
+                        console.error("Status:", response.status);
+                    }
+                })
+                .catch(function (error) {
+                    alert("Erro de conexão.");
+                    console.error("Erro:", error);
+                });
         });
-    });
-    </script>
+</script>
+
 </body>
 </html>

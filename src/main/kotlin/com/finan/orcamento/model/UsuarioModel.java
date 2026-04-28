@@ -25,18 +25,32 @@ public class UsuarioModel implements Serializable {
     @Column(name="nome_usuario")
     private String nomeUsuario;
 
+    @Column(name = "rg")
+    private String rg;
+
+    @Column(name = "cpf")
+    private String cpf;
+
+    @Column(name = "nome_mae")
+    private String nomeMae;
+
     @JsonIgnore
     @OneToMany(mappedBy = "id")
     private List<OrcamentoModel> orcamentos = new ArrayList<>();
 
-    public UsuarioModel(){}
+    public UsuarioModel() {}
 
-    public UsuarioModel(Long id, String nomeUsuario, List<OrcamentoModel> orcamentos) {
-        this.id = id;
+    // ── CONSTRUTOR COMPLETO (com todos os campos) ─────────────────
+    public UsuarioModel(Long id, String nomeUsuario, String rg,
+                        String cpf, String nomeMae,
+                        List<OrcamentoModel> orcamentos) {
+        this.id          = id;
         this.nomeUsuario = nomeUsuario;
-        this.orcamentos = orcamentos;
+        this.rg          = rg;
+        this.cpf         = cpf;
+        this.nomeMae     = nomeMae;
+        this.orcamentos  = orcamentos;
     }
-
     public Long getId() {
         return id;
     }
@@ -53,6 +67,15 @@ public class UsuarioModel implements Serializable {
         this.nomeUsuario = nomeUsuario;
     }
 
+    public String getRg() { return rg; }
+    public void setRg(String rg) { this.rg = rg; }
+
+    public String getCpf() { return cpf; }
+    public void setCpf(String cpf) { this.cpf = cpf; }
+
+    public String getNomeMae() { return nomeMae; }
+    public void setNomeMae(String nomeMae) { this.nomeMae = nomeMae; }
+
     public List<OrcamentoModel> getOrcamentos() {
         return orcamentos;
     }
@@ -60,6 +83,7 @@ public class UsuarioModel implements Serializable {
     public void setOrcamentos(List<OrcamentoModel> orcamentos) {
         this.orcamentos = orcamentos;
     }
+
 
     @Override
     public boolean equals(Object o) {
