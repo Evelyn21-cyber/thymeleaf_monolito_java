@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Financeiro - Fornecedores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* Reutilizando seu CSS de variáveis e estilos */
+        :root {
+            --bg:      #0f1117;
+            --surface: #1a1d27;
+            --border:  #2a2e3f;
+            --accent:  #4f8ef7;
+            --accent-h:#3a7ae0;
+            --success: #34d399;
+            --danger:  #f87171;
+            --text:    #e4e8f0;
+            --muted:   #7a82a0;
+            --radius:  12px;
+            --shadow:  0 8px 32px rgba(0,0,0,.45);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 48px 16px 64px;
+        }
+
+        header {
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 36px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+        header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+        header h1 span { color: var(--accent); }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: var(--shadow);
+            margin-bottom: 32px;
+        }
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title::before {
+            content: '';
+            width: 4px; height: 18px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .form-row { display: flex; gap: 18px; }
+        .form-row .form-group { flex: 1; }
+
+        label { font-size: .78rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+
+        input[type="text"], input[type="email"] {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            outline: none;
+            width: 100%;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,.18); }
+
+        .btn-salvar {
+            margin-top: 8px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: .95rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-excluir {
+            color: var(--danger);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .table-wrapper { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+        thead { background: #12141f; }
+        thead th { padding: 13px 16px; text-align: left; font-size: .7rem; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+        tbody td { padding: 13px 16px; color: var(--text); }
+
+        .badge-id { display: inline-block; background: rgba(79,142,247,.15); color: var(--accent); border-radius: 6px; padding: 2px 9px; font-size: .78rem; }
+
+        #toast {
+            position: fixed; bottom: 28px; right: 28px;
+            background: var(--success); color: #0f1117;
+            padding: 12px 22px; border-radius: 8px;
+            opacity: 0; transform: translateY(10px);
+            transition: opacity .3s, transform .3s;
+            z-index: 999;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 600px) { .form-row { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Gestão de <span>Fornecedores</span></h1>
+</header>
+
+<div class="card">
+    <div class="card-title">Cadastro de Fornecedor</div>
+
+    <form id="fornecedorForm"
+          th:action="@{/fornecedores/salvar}"
+          th:object="${fornecedor}"
+          method="post">
+
+        <input type="hidden" th:field="*{id}">
+
+        <div class="form-group">
+            <label>Nome do Fornecedor / Razão Social</label>
+            <input type="text" th:field="*{nome}" placeholder="Ex.: Tech Solutions Ltda" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>CNPJ</label>
+                <input type="text" th:field="*{cnpj}" placeholder="00.000.000/0001-00">
+            </div>
+
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="text" th:field="*{telefone}" placeholder="(00) 00000-0000">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>E-mail de Contato</label>
+            <input type="email" th:field="*{email}" placeholder="contato@fornecedor.com.br">
+        </div>
+
+        <button class="btn-salvar" type="submit">Salvar Fornecedor</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-title">Fornecedores Registrados</div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>CNPJ</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="f : ${fornecedores}">
+                <td><span class="badge-id" th:text="${f.id}"></span></td>
+                <td th:text="${f.nome}"></td>
+                <td th:text="${f.cnpj}"></td>
+                <td>
+                    <a class="btn-excluir" th:href="@{/fornecedores/deletar/{id}(id=${f.id})}"
+                       onclick="return confirm('Excluir este fornecedor?')">Excluir</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(fornecedores)}">
+                <td colspan="4" style="text-align: center; color: var(--muted); padding: 20px;">Nenhum fornecedor encontrado.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="toast">✓ Fornecedor atualizado com sucesso!</div>
+
+<script>
+    document.getElementById("fornecedorForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        var form = event.target;
+        var formData = new FormData(form);
+
+        fetch(form.action, {
+            method: form.method,
+            body: formData
+        })
+        .then(function (response) {
+            if (response.ok) {
+                var toast = document.getElementById("toast");
+                toast.classList.add("show");
+                setTimeout(function () {
+                    // Redireciona para a listagem para atualizar os dados na tabela
+                    window.location.href = "/fornecedores";
+                }, 1000);
+            } else {
+                alert("Erro ao salvar o fornecedor.");
+            }
+        })
+        .catch(function (error) {
+            console.error("Erro:", error);
+        });
+    });
+</script>
+
+</body>
+</html>
