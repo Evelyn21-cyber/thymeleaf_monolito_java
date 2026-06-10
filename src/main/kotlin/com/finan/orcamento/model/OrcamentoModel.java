@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -21,7 +22,6 @@ public class OrcamentoModel implements Serializable {
     @Enumerated(EnumType.STRING)
     private IcmsEstados icmsEstados;
 
-    @NotNull
     @Column(name="valor_orcamento")
     private BigDecimal valorOrcamento;
 
@@ -32,18 +32,30 @@ public class OrcamentoModel implements Serializable {
     @JoinColumn(name="usuario_id", referencedColumnName = "id")
     private UsuarioModel usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "fornecedor_id", referencedColumnName = "id")
+    private FornecedorModel fornecedor;
+    public FornecedorModel getFornecedor() {
+        return fornecedor;
+    }
+
+    public void setFornecedor(FornecedorModel fornecedor) {
+        this.fornecedor = fornecedor;
+    }
+
     public void calcularIcms() {
         this.valorICMS = this.icmsEstados.getStrategy().calcular(this.valorOrcamento);
     }
 
     public OrcamentoModel(){}
 
-    public OrcamentoModel(Long id, IcmsEstados icmsEstados, @NotNull BigDecimal valorOrcamento, BigDecimal valorICMS, UsuarioModel usuario) {
+    public OrcamentoModel(Long id, IcmsEstados icmsEstados, @NotNull BigDecimal valorOrcamento, BigDecimal valorICMS, UsuarioModel usuario, FornecedorModel fornecedor) {
         this.id = id;
         this.icmsEstados = icmsEstados;
         this.valorOrcamento = valorOrcamento;
         this.valorICMS = valorICMS;
         this.usuario = usuario;
+        this.fornecedor = fornecedor;
     }
 
     public Long getId() {
@@ -62,12 +74,11 @@ public class OrcamentoModel implements Serializable {
         this.icmsEstados = icmsEstados;
     }
 
-    @NotNull
     public BigDecimal getValorOrcamento() {
         return valorOrcamento;
     }
 
-    public void setValorOrcamento(@NotNull BigDecimal valorOrcamento) {
+    public void setValorOrcamento(BigDecimal valorOrcamento) {
         this.valorOrcamento = valorOrcamento;
     }
 

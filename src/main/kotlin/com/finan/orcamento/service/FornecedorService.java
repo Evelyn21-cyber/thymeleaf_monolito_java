@@ -6,26 +6,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FornecedorService {
 
     @Autowired
-    private FornecedorRepository repository;
+    private FornecedorRepository fornecedorRepository;
 
-    public List<FornecedorModel> listarTodos() {
-        return repository.findAll();
+    public List<FornecedorModel> buscarTodos() {
+        return fornecedorRepository.findAll();
     }
 
-    public FornecedorModel salvar(FornecedorModel fornecedor) {
-        return repository.save(fornecedor);
+    public FornecedorModel buscaId(Long id) {
+        Optional<FornecedorModel> obj = fornecedorRepository.findById(id);
+        if (obj.isPresent()) {
+            return obj.get();
+        } else {
+            throw new RuntimeException("Fornecedor não encontrado com id: " + id);
+        }
     }
 
-    public FornecedorModel buscarPorId(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Fornecedor não encontrado"));
+    public FornecedorModel cadastrarFornecedor(FornecedorModel fornecedorModel) {
+        return fornecedorRepository.save(fornecedorModel);
     }
 
-    public void deletar(Long id) {
-        repository.deleteById(id);
+    public FornecedorModel atualizarFornecedor(FornecedorModel fornecedorModel, Long id) {
+        FornecedorModel existing = buscaId(id);
+        existing.setNomeFornecedor(fornecedorModel.getNomeFornecedor());
+        existing.setCnpj(fornecedorModel.getCnpj());
+        return fornecedorRepository.save(existing);
+    }
+
+    public void deletarFornecedor(Long id) {
+        fornecedorRepository.deleteById(id);
     }
 }

@@ -1,14 +1,12 @@
 package com.finan.orcamento.controller;
 
 import com.finan.orcamento.model.UsuarioModel;
-import com.finan.orcamento.repositories.UsuarioRepository;
 import com.finan.orcamento.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -19,34 +17,28 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    // ── GET: abre a tela com formulário vazio ─────────────────────
+    /** GET /usuarios → exibe formulário vazio + lista de usuários */
     @GetMapping
     public String getUsuarioPage(Model model) {
         model.addAttribute("usuarioModel", new UsuarioModel());
+        model.addAttribute("usuarios", usuarioService.buscarUsuario());
         return "usuarioPage";
     }
 
-    // ── GET pesquisa: busca todos e popula a tabela ───────────────
-    @GetMapping("pesquisa")
-    public String listarUsuarios(Model model) {
-        List<UsuarioModel> usuarios = usuarioService.buscarUsuario();
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("usuarioModel", new UsuarioModel());
-        return "usuarioPage";
-    }
-
-    // ── POST: recebe o form e salva o usuário ─────────────────────
-    // O @ModelAttribute vincula automaticamente todos os campos do
-    // form HTML (nomeUsuario, rg, cpf, nomeMae) ao objeto Java.
-    // Nenhuma alteração extra é necessária aqui.
+    /** POST /usuarios → salva e redireciona de volta para a listagem */
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<UsuarioModel> cadastraUsuario(
-            @ModelAttribute UsuarioModel usuarioModel) {
-        return ResponseEntity.ok(
-                usuarioService.cadastrarUsuario(usuarioModel));
+    public String cadastraUsuario(@ModelAttribute UsuarioModel usuarioModel,
+                                  RedirectAttributes redirectAttributes) {
+        usuarioService.cadastrarUsuario(usuarioModel);
+        redirectAttributes.addFlashAttribute("mensagem", "Usuário salvo com sucesso!");
+        return "redirect:/usuarios";
+    }
+
+    /** POST /usuarios/deletar/{id} → deleta e redireciona */
+    @PostMapping("/deletar/{id}")
+    public String deletarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        usuarioService.deletaUsuario(id);
+        redirectAttributes.addFlashAttribute("mensagem", "Usuário removido com sucesso!");
+        return "redirect:/usuarios";
     }
 }

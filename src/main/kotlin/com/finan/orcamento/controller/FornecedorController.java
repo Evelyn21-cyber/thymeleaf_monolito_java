@@ -1,40 +1,42 @@
 package com.finan.orcamento.controller;
 
 import com.finan.orcamento.model.FornecedorModel;
-import com.finan.orcamento.service.FornecedorService; // Importe o NOVO Service
+import com.finan.orcamento.service.FornecedorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/fornecedores")
 public class FornecedorController {
 
     @Autowired
-    private FornecedorService service; // Agora injetamos o Service
+    private FornecedorService fornecedorService;
 
+    /** GET /fornecedores → exibe formulário + lista */
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("fornecedores", service.listarTodos());
-        return "fornecedor/lista";
+    public String getFornecedorPage(Model model) {
+        model.addAttribute("fornecedorModel", new FornecedorModel());
+        model.addAttribute("fornecedores", fornecedorService.buscarTodos());
+        return "fornecedorPage";
     }
 
-    @GetMapping("/novo")
-    public String novo(Model model) {
-        model.addAttribute("fornecedor", new FornecedorModel());
-        return "fornecedor/form";
-    }
-
-    @PostMapping("/salvar")
-    public String salvar(@ModelAttribute("fornecedor") FornecedorModel fornecedor) {
-        service.salvar(fornecedor);
+    /** POST /fornecedores → salva e redireciona */
+    @PostMapping
+    public String cadastrarFornecedor(@ModelAttribute FornecedorModel fornecedorModel,
+                                      RedirectAttributes redirectAttributes) {
+        fornecedorService.cadastrarFornecedor(fornecedorModel);
+        redirectAttributes.addFlashAttribute("mensagem", "Fornecedor cadastrado com sucesso!");
         return "redirect:/fornecedores";
     }
 
-    @GetMapping("/deletar/{id}")
-    public String deletar(@PathVariable Long id) {
-        service.deletar(id);
+    /** POST /fornecedores/deletar/{id} → deleta e redireciona */
+    @PostMapping("/deletar/{id}")
+    public String deletarFornecedor(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        fornecedorService.deletarFornecedor(id);
+        redirectAttributes.addFlashAttribute("mensagem", "Fornecedor removido!");
         return "redirect:/fornecedores";
     }
 }
